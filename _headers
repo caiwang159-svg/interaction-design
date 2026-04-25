@@ -1,0 +1,28 @@
+# Netlify 部署配置
+# 安全头部
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# 缓存控制
+/*.html
+  Cache-Control: public, max-age=3600
+
+/*.css
+  Cache-Control: public, max-age=2592000
+
+/*.js
+  Cache-Control: public, max-age=2592000
+
+# 字体文件缓存
+/*.woff2
+  Cache-Control: public, max-age=31536000
+
+/*.woff
+  Cache-Control: public, max-age=31536000
+
+/*.ttf
+  Cache-Control: public, max-age=31536000

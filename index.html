@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- SEO Meta Tags -->
+    <title>水墨流动 | Ink Flow - 交互式水墨艺术体验</title>
+    <meta name="description" content="体验独特的交互式水墨艺术，移动鼠标创造流动的水墨效果，感受中国传统书法与现代数字艺术的完美融合。">
+    <meta name="keywords" content="水墨, 交互艺术, 数字艺术, 书法, 中国传统文化, p5.js, Ink Flow">
+    <meta name="author" content="Ink Flow Art">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com/">
+    <meta property="og:title" content="水墨流动 | Ink Flow - 交互式水墨艺术体验">
+    <meta property="og:description" content="体验独特的交互式水墨艺术，移动鼠标创造流动的水墨效果，感受中国传统书法与现代数字艺术的完美融合。">
+    <meta property="og:image" content="https://your-domain.com/og-image.jpg">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-domain.com/">
+    <meta property="twitter:title" content="水墨流动 | Ink Flow - 交互式水墨艺术体验">
+    <meta property="twitter:description" content="体验独特的交互式水墨艺术，移动鼠标创造流动的水墨效果，感受中国传统书法与现代数字艺术的完美融合。">
+    <meta property="twitter:image" content="https://your-domain.com/og-image.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js" as="script" crossorigin>
+    <link rel="preload" href="sketch.js" as="script">
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Theme Color for mobile browsers -->
+    <meta name="theme-color" content="#F5F0E6">
+    <meta name="msapplication-TileColor" content="#F5F0E6">
+    
+    <!-- Mobile App Capable -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="水墨流动">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow: hidden;
+            background: #F5F0E6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        canvas {
+            display: block;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 14px;
+            color: #666;
+            z-index: 1000;
+            background: rgba(245, 240, 230, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .info.fade-out {
+            opacity: 0;
+        }
+        
+        /* Loading screen */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #F5F0E6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        #loading.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            color: #666;
+            letter-spacing: 0.2em;
+        }
+        
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1a1a1a;
+            }
+            .info {
+                background: rgba(40, 40, 40, 0.9);
+                color: #ccc;
+            }
+            #loading {
+                background: #1a1a1a;
+            }
+            .loading-text {
+                color: #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loading-text">正在准备水墨...</div>
+    </div>
+    
+    <!-- Info Panel -->
+    <div class="info" id="info-panel">移动鼠标产生水墨流动效果 · 按 H 查看快捷键</div>
+    
+    <!-- Main Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js" crossorigin></script>
+    <script src="sketch.js"></script>
+    
+    <!-- Hide loading screen when ready -->
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loading').classList.add('hidden');
+                // Fade out info after 5 seconds
+                setTimeout(function() {
+                    document.getElementById('info-panel').classList.add('fade-out');
+                }, 5000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
